@@ -1,4 +1,4 @@
-# Giraffe360 Website Prototype
+# Giraffe360 Website Prototype — Photographer program v2
 
 A responsive, 1:1 front-end prototype of the Giraffe360 marketing site, built from the
 Figma design (`giraffe_website_design_v1`). Vite + React, desktop-first (1920px design
