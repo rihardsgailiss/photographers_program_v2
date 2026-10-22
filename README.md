@@ -14,7 +14,9 @@ canvas, scaled to fit narrower windows).
   Content Studio & Camera plan the first item is "I am a: Real estate agent / Photographer" (Agent by
   default). Photographer turns it into a $0 Photographer program request: contact and company details
   only, no address and no card. Customer Support reviews the request first; the address and card are
-  asked in onboarding once the photographer is approved.
+  asked in onboarding once the photographer is approved. Other hides the order summary and shows a
+  "Get in touch" message form (name, e-mail, message) so Customer Support can find the right solution.
+  The same choice is on the in-app checkout (`/studio/checkout`, flow 3).
 - `/photographer-program` — Photographer Partner Program landing page (US / Canada) with the
   application form, "How the program works" and FAQ.
 

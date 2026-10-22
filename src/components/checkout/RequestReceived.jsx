@@ -36,6 +36,24 @@ export function RequestReceived({ existing = false }) {
   )
 }
 
+/* "Other" path: the message went to Customer Support. */
+export function MessageSent({ email, backTo = '/pricing', backLabel = 'Back to pricing →' }) {
+  return (
+    <div className="coDone" role="status" aria-live="polite">
+      <span className="coDone__icon" aria-hidden="true"><Check size={28} /></span>
+      <h2 className="st-h2">Thanks, your message is sent</h2>
+      <p className="st-p">
+        Customer Support will get back to you at <strong>{email}</strong> within 2 working days to find the
+        right solution for your business.
+      </p>
+      <p className="coDone__note">Nothing was ordered and no payment details were taken.</p>
+      <div className="coDone__proto">
+        <Link to={backTo} className="st-protoBtn">{backLabel}</Link>
+      </div>
+    </div>
+  )
+}
+
 /* Paid (agent) path: prototype dead end. */
 export function OrderPlaced({ plan = 'camera' }) {
   const info = PLAN_INFO[plan] ?? PLAN_INFO.camera

@@ -1,15 +1,18 @@
 import { useState } from 'react'
 import StudioField, { FloatInput } from '../studio/StudioField.jsx'
 import AddressFields, { EMPTY_ADDRESS, validateAddress } from './AddressFields.jsx'
+import GetInTouch from './GetInTouch.jsx'
 import { DEFAULT_APPLICATION, DEMO_ADDRESS, DEMO_CARD, INDUSTRIES } from '../../context/programDefaults.js'
 import { digitsOnly, formatCard, formatExpiry, isEmail } from '../../utils/format.js'
 import './CheckoutForm.css'
 
 /* Mirrors subscribe.giraffe360.com/order-checkout: address → contact → company → payment on the
    left, order summary on the right. For the Content Studio & Camera plan the first item is the
-   Agent / Photographer choice. Photographer turns the checkout into a $0 program request that
-   Customer Support reviews first: only contact and company details are asked, the delivery
-   address and card come later in onboarding (mode "activate"), once the request is approved. */
+   Agent / Photographer / Other choice. Photographer turns the checkout into a $0 program request
+   that Customer Support reviews first: only contact and company details are asked, the delivery
+   address and card come later in onboarding (mode "activate"), once the request is approved.
+   Other replaces the order with a "Get in touch" message, so people who are neither can be
+   contacted and offered the right solution. */
 
 export const PLAN_INFO = {
   studio: { name: 'Content Studio subscription', price: 85, shipping: false },
@@ -20,7 +23,15 @@ export const PLAN_INFO = {
 const AUDIENCES = [
   { id: 'agent', label: 'Real estate agent' },
   { id: 'photographer', label: 'Photographer' },
+  { id: 'other', label: 'Other' },
 ]
+
+const AUDIENCE_HINT = {
+  agent: 'Real estate agents subscribe to Content Studio & Camera. Photographers can apply for the free Photographer program instead.',
+  photographer:
+    'Photographers apply to the Photographer program: a free Gen5 camera and Content Studio & Camera subscription for approved partners in the US and Canada. Our Customer Support reviews every request and calls you. No address or card is needed now; we ask for them once you are approved.',
+  other: 'Neither an agent nor a photographer? Leave us a message and Customer Support will get in touch to find the right solution for you.',
+}
 
 const money = (n) => `$ ${n.toFixed(2)}`
 
@@ -41,6 +52,7 @@ export default function CheckoutForm({
   const canSelect = audienceSelectable && plan === 'camera' && !lockedAudience
   const [audience, setAudience] = useState(lockedAudience ?? 'agent')
   const photographer = plan === 'camera' && audience === 'photographer'
+  const other = plan === 'camera' && canSelect && audience === 'other'
   /* Photographer requests are reviewed first: no address, no card until approved (activate mode). */
   const requestOnly = photographer && !activate
   const collectPayment = !requestOnly
@@ -124,11 +136,8 @@ export default function CheckoutForm({
     </div>
   )
 
-  return (
-    <div className="co">
-      <form className="co__form" onSubmit={onSubmit} noValidate>
-        {canSelect && (
-          <section className="co__card" aria-labelledby="co-audience">
+  const audienceCard = canSelect && (
+    <section className="co__card" aria-labelledby="co-audience">
             <div className="co__audienceRow">
               <h2 id="co-audience" className="st-h3">I am a</h2>
               <div className="coToggle" role="tablist" aria-labelledby="co-audience">
@@ -147,12 +156,27 @@ export default function CheckoutForm({
               </div>
             </div>
             <p className="co__hint">
-              {photographer
-                ? 'Photographers apply to the Photographer program: a free Gen5 camera and Content Studio & Camera subscription for approved partners in the US and Canada. Our Customer Support reviews every request and calls you. No address or card is needed now; we ask for them once you are approved.'
-                : 'Real estate agents subscribe to Content Studio & Camera. Photographers can apply for the free Photographer program instead.'}
+              {AUDIENCE_HINT[audience]}
             </p>
           </section>
-        )}
+  )
+
+  /* "Other": no order, no summary — just a message so we can get in touch. */
+  if (other) {
+    return (
+      <div className="co co--single">
+        <div className="co__form">
+          {audienceCard}
+          <GetInTouch prefill={prefill} onSend={(message) => onDone?.({ audience: 'other', plan, ...message })} />
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="co">
+      <form className="co__form" onSubmit={onSubmit} noValidate>
+        {audienceCard}
 
         {collectPayment && (
         <section className="co__card" aria-labelledby="co-address">

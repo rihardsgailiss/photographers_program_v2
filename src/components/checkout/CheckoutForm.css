@@ -194,6 +194,21 @@
 }
 .co__program p { margin: 0; color: var(--st-muted); }
 
+/* "Other": single column, no summary; Get in touch form */
+.co--single { grid-template-columns: minmax(0, 720px); }
+.touch { gap: 18px; }
+.touch__head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+.touch__message {
+  height: auto;
+  min-height: 160px;
+  padding: 14px 16px;
+  resize: vertical;
+  line-height: 24px;
+}
+.touch__message::placeholder { color: var(--st-faint); }
+.st-btn.touch__send--idle { background: #8a929c; color: #fff; }
+.st-btn.touch__send--idle:hover { background: #7c848e; }
+
 /* Confirmation states */
 .coDone {
   max-width: 640px;
