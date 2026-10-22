@@ -1,8 +1,5 @@
 import { useState } from 'react'
-import { useProgram } from '../../context/ProgramContext.jsx'
-import ApplicationForm from '../../components/ApplicationForm.jsx'
-import Modal from '../../components/Modal.jsx'
-import AudienceToggle from './AudienceToggle.jsx'
+import { useNavigate } from 'react-router-dom'
 import './PricingHero.css'
 
 const PLANS = [
@@ -33,14 +30,6 @@ const PLANS = [
     cta: 'Subscribe now',
     ctaVariant: 'dark',
     toggle: true,
-    /* Photographer program: same plan, $0 for approved partners in the US and Canada */
-    program: {
-      price: '$0',
-      unit: '/ photographers program',
-      note: 'Free camera and subscription for approved photographers in the US and Canada.',
-      cta: 'Apply',
-      ctaSent: 'Request sent',
-    },
   },
   {
     id: 'enterprise',
@@ -80,76 +69,46 @@ function BillingToggle() {
   )
 }
 
-function PlanCard({ plan, photographer, requestSent, onApply, onReset }) {
-  const program = photographer && plan.program ? plan.program : null
-
-  const price = program ? program.price : plan.price
-  const unit = program ? program.unit : '/ month'
-  const cta = program ? (requestSent ? program.ctaSent : program.cta) : plan.cta
-  const ctaVariant = program && requestSent ? 'secondary' : plan.ctaVariant
-
+function PlanCard({ plan, onSelect }) {
   return (
-    <article className={`planCard planCard--${plan.variant}${program ? ' planCard--program' : ''}`}>
+    <article className={`planCard planCard--${plan.variant}`}>
       <div className="planCard__title">
         <h3 className="planCard__name">{plan.title}</h3>
         <p className="planCard__desc">{plan.desc}</p>
       </div>
 
-      {plan.toggle && !program && <BillingToggle />}
-      {program && <p className="planCard__programNote">{program.note}</p>}
+      {plan.toggle && <BillingToggle />}
 
       <div className="planCard__pricing">
-        {price && (
+        {plan.price && (
           <p className="planCard__price">
-            <span className="planCard__priceValue">{price}</span>
-            <span className="planCard__priceUnit">{unit}</span>
+            <span className="planCard__priceValue">{plan.price}</span>
+            <span className="planCard__priceUnit">/ month</span>
           </p>
         )}
       </div>
 
       <button
         type="button"
-        className={`planCard__btn planCard__btn--${ctaVariant}`}
-        disabled={Boolean(program && requestSent)}
-        onClick={program ? onApply : undefined}
+        className={`planCard__btn planCard__btn--${plan.ctaVariant}`}
+        onClick={plan.price ? () => onSelect(plan.id) : undefined}
       >
-        {cta}
+        {plan.cta}
       </button>
-      {program && requestSent && (
-        <button type="button" className="planCard__proto" onClick={onReset}>
-          Prototype: reset and apply again
-        </button>
-      )}
     </article>
   )
 }
 
+/* Plan cards. "Subscribe now" opens the checkout; the Agent / Photographer choice lives there. */
 export default function PricingHero() {
-  const { status, reset } = useProgram()
-  const [audience, setAudience] = useState('agent')
-  const [applyOpen, setApplyOpen] = useState(false)
-  const requestSent = status !== 'none'
-
+  const navigate = useNavigate()
   return (
     <section className="pricingHero">
-      <AudienceToggle value={audience} onChange={setAudience} />
-
       <div className="pricingHero__cards">
         {PLANS.map((plan) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            photographer={audience === 'photographer'}
-            requestSent={requestSent}
-            onApply={() => setApplyOpen(true)}
-            onReset={reset}
-          />
+          <PlanCard key={plan.id} plan={plan} onSelect={(id) => navigate(`/checkout?plan=${id}`)} />
         ))}
       </div>
-
-      <Modal open={applyOpen} onClose={() => setApplyOpen(false)} title="Apply to the Photographer program">
-        <ApplicationForm variant="modal" title="Apply to the Photographer program" />
-      </Modal>
     </section>
   )
 }

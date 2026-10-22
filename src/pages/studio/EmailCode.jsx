@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { StudioBar } from '../../layouts/StudioLayout.jsx'
-import { useProgram } from '../../context/ProgramContext.jsx'
+import { useFlow, useProgram } from '../../context/ProgramContext.jsx'
 import useCountdown from '../../hooks/useCountdown.js'
 import useCodeInput from '../../hooks/useCodeInput.js'
 import './EmailCode.css'
@@ -9,23 +9,23 @@ import './EmailCode.css'
 /* Figma "Email verification" (2032:1318). Any 6 digits are accepted in the prototype. */
 export default function EmailCode() {
   const navigate = useNavigate()
-  const { profile, status, account, setStatus } = useProgram()
+  const { profile, status, setStatus } = useProgram()
+  const flow = useFlow()
   const { left, label, restart } = useCountdown(599)
   const { digits, bind, focusFirst } = useCodeInput(6, () => {
-    // Already in the program (camera ordered): plain log-in goes straight to the program page.
+    // Already in the program: plain log-in goes straight to the program page.
     if (status === 'ordered') {
       navigate('/studio/organisation/photographer-program')
       return
     }
-    if (account !== 'new' && status !== 'submitted') {
-      // Existing account that has not applied: plain log-in lands in Content Studio.
-      navigate('/studio/projects')
+    setStatus('loggedIn')
+    if (flow.id === 'demo') {
+      // Existing account: workspace exists, only the delivery address and card are needed.
+      navigate('/signup/checkout')
       return
     }
-    // Approved applicant (new or existing account): the camera order comes first. New accounts
-    // then set up their workspace in the sign-up steps.
-    setStatus('loggedIn')
-    navigate('/signup/order')
+    // New account (landing or checkout flow): onboarding starts with the workspace name.
+    navigate('/signup/workspace')
   })
 
   useEffect(() => {

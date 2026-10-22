@@ -22,7 +22,7 @@ export default function ApplicationConfirmation({ variant = 'card', onReset }) {
       <ol className="appConfirm__steps">
         <li>We call you.</li>
         <li>If you're approved, we email you a sign-up link.</li>
-        <li>You add your card and your delivery and billing address. Your camera ships and your 6 months start.</li>
+        <li>Sign in, name your workspace and add your delivery address and card. Your camera ships and your 6 months start.</li>
       </ol>
       <p className="appConfirm__note">No account is created yet.</p>
 

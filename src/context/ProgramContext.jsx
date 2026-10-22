@@ -7,24 +7,29 @@ import {
   slugify,
   startOfDay,
 } from './programDefaults.js'
+import { FLOWS } from '../data/flows.js'
 
 /*
- * Prototype state for the Photographer program flow. Persisted to sessionStorage so a
+ * Prototype state for the Photographer program flows. Persisted to sessionStorage so a
  * refresh or a deep link keeps the submitted application; falls back to demo defaults
  * so every route renders cold.
  */
-const KEY = 'g360.program.v1'
+const KEY = 'g360.program.v2'
+
+const EMPTY_ADDRESS = { street: '', apt: '', city: '', state: '', zip: '', country: 'United States' }
 
 const INITIAL = {
-  account: 'new', // 'new' (website sign-up) | 'demo' (Free, no billing) | 'plus' (paid plan, no camera)
+  flow: null, // 'landing' | 'checkout' | 'demo' — chosen on the /flows entry page
+  account: 'new', // 'new' (website visitor, no account) | 'demo' (Free plan, no billing)
   application: null,
   status: 'none', // 'none' | 'submitted' | 'loggedIn' | 'ordered'
-  signup: { heardAbout: '', orgName: '', country: '', phone: '', invites: '' },
+  signup: { orgName: '', country: '', phone: '' },
   order: {
-    delivery: { street: '', city: '', state: '', zip: '' },
+    delivery: EMPTY_ADDRESS,
     billingSame: true,
-    billing: { street: '', city: '', state: '', zip: '' },
-    orderedAt: null,
+    billing: EMPTY_ADDRESS,
+    cardCaptured: false, // card and address taken in onboarding (after approval)
+    orderedAt: null, // program activated: camera ships, 6 months start
   },
 }
 
@@ -81,19 +86,29 @@ export function ProgramProvider({ children }) {
     setState((s) => ({ ...s, signup: { ...s.signup, ...patch } }))
   }, [])
 
+  /* The program starts: camera ships, partner link goes live, 6 months begin. */
+  const activate = useCallback(() => {
+    setState((s) => ({
+      ...s,
+      status: 'ordered',
+      order: { ...s.order, orderedAt: s.order.orderedAt ?? new Date().toISOString() },
+    }))
+  }, [])
+
+  /* Card captured and program activated in one go (onboarding step 2 in the landing flow). */
   const placeOrder = useCallback((order) => {
     setState((s) => ({
       ...s,
       status: 'ordered',
-      order: { ...s.order, ...order, orderedAt: new Date().toISOString() },
+      order: { ...s.order, ...order, cardCaptured: true, orderedAt: new Date().toISOString() },
     }))
   }, [])
 
-  /* Prototype: switch the account type (new / demo / paid). Starts that account's flow afresh. */
-  const setAccount = useCallback((account) => setState({ ...INITIAL, account }), [])
+  /* Prototype: start one of the three flows from scratch. */
+  const startFlow = useCallback((flow) => setState({ ...INITIAL, flow, account: FLOWS[flow]?.account ?? 'new' }), [])
 
-  /* Reset the flow but keep the chosen account type. */
-  const reset = useCallback(() => setState((s) => ({ ...INITIAL, account: s.account })), [])
+  /* Restart the current flow (keeps the flow and its account type). */
+  const reset = useCallback(() => setState((s) => ({ ...INITIAL, flow: s.flow, account: s.account })), [])
 
   const profile = useMemo(() => {
     const app = state.application ?? DEFAULT_APPLICATION
@@ -114,8 +129,20 @@ export function ProgramProvider({ children }) {
   }, [state.application, state.order.orderedAt, state.signup])
 
   const value = useMemo(
-    () => ({ ...state, profile, submitApplication, setEmail, updateApplication, setStatus, updateSignup, placeOrder, setAccount, reset }),
-    [state, profile, submitApplication, setEmail, updateApplication, setStatus, updateSignup, placeOrder, setAccount, reset],
+    () => ({
+      ...state,
+      profile,
+      submitApplication,
+      setEmail,
+      updateApplication,
+      setStatus,
+      updateSignup,
+      activate,
+      placeOrder,
+      startFlow,
+      reset,
+    }),
+    [state, profile, submitApplication, setEmail, updateApplication, setStatus, updateSignup, activate, placeOrder, startFlow, reset],
   )
 
   return <ProgramContext.Provider value={value}>{children}</ProgramContext.Provider>
@@ -125,4 +152,10 @@ export function useProgram() {
   const ctx = useContext(ProgramContext)
   if (!ctx) throw new Error('useProgram must be used inside <ProgramProvider>')
   return ctx
+}
+
+/* The active flow definition (falls back to the landing flow for deep links without one). */
+export function useFlow() {
+  const { flow } = useProgram()
+  return FLOWS[flow] ?? FLOWS.landing
 }

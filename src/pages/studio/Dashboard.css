@@ -259,9 +259,7 @@
   .dashTiles { grid-template-columns: repeat(2, 1fr); }
   .dashHow__grid { grid-template-columns: 1fr; }
 }
- (max-width: 1180px) {
-}
- (max-width: 900px) {
+@media (max-width: 900px) {
   .dashLink__row { flex-wrap: wrap; }
   .dashKitchen { flex-wrap: wrap; }
 }

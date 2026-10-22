@@ -154,33 +154,3 @@
 @media (prefers-reduced-motion: reduce) {
   .planCard { animation: none; }
 }
-
-/* Photographer program mode (Content Studio & Camera card) */
-.planCard__programNote {
-  margin: 0;
-  padding: 12px 16px;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--dark);
-}
-.planCard__btn:disabled {
-  cursor: default;
-  filter: none;
-}
-.planCard--program .planCard__priceUnit { font-size: 13px; line-height: 18px; }
-.planCard__proto {
-  align-self: center;
-  margin-top: -12px;
-  padding: 4px 10px;
-  border: 1px dashed var(--border);
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--text-muted);
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.planCard__proto:hover { color: var(--dark); border-color: var(--dark); }

@@ -5,36 +5,35 @@ Figma design (`giraffe_website_design_v1`). Vite + React, desktop-first (1920px 
 canvas, scaled to fit narrower windows).
 
 ## Pages
+- `/flows` — prototype entry point: pick one of the three flows (below)
 - `/` — Home (hero, trusted-by logo marquee, horizontal-scroll feature gallery,
   scroll-linked "How it works" accordion, testimonials, AI tools, video carousel, CTA band, footer)
-- `/pricing` — Pricing (Agent / Photographer toggle, billing toggle + plan cards, sticky-header
-  comparison table, FAQ accordion). In Photographer mode the Content Studio & Camera card becomes
-  "$0 / photographers program" with an Apply modal.
+- `/pricing` — Pricing (billing toggle + plan cards, sticky-header comparison table, FAQ accordion).
+  "Subscribe now" opens the checkout.
+- `/checkout?plan=camera` — Checkout, modelled on subscribe.giraffe360.com/order-checkout. For the
+  Content Studio & Camera plan the first item is "I am a: Real estate agent / Photographer" (Agent by
+  default). Photographer turns it into a $0 Photographer program request: contact and company details
+  only, no address and no card. Customer Support reviews the request first; the address and card are
+  asked in onboarding once the photographer is approved.
 - `/photographer-program` — Photographer Partner Program landing page (US / Canada) with the
   application form, "How the program works" and FAQ.
 
-## Photographer program flow (prototype)
-Clickable end to end; state lives in `sessionStorage` (`ProgramContext`), so every route can also be
-opened directly with demo defaults.
+## The three flows (prototype)
+Each flow starts from `/flows` and shows its name and numbered steps in the prototype map (yellow dot,
+top-left). Any step can be jumped to; the map puts the shared state (`ProgramContext`, in
+`sessionStorage`) into the shape that step needs. "Switch flow" returns to `/flows`, "Restart flow"
+starts the active flow over.
 
-1. `/photographer-program` or `/pricing` (Photographer → Apply) — application form → confirmation
-2. `/email/approved` — mock approval email from customer support (prototype-only page)
-3. `/signup/login` — Content Studio log in (email prefilled from the link) → `/signup/code` — email code (any 6 digits)
-4. `/signup/order` — card on file ($0), delivery and billing address (comes first: the order starts the program)
-5. `/signup/workspace` — new accounts only: name the workspace (everything else is known from the application)
-6. `/studio/organisation/photographer-program` — Organisation settings → Photographer program tab (replaces Billing; day-one state)
-7. `/studio/projects` — Content Studio dashboard, example project page
+| # | Flow | Steps |
+|---|---|---|
+| 1 | New user, through Landing page | `/photographer-program` apply → request received → `/email/approved` → `/signup/login` → `/signup/code` → onboarding 1/2 `/signup/workspace` → onboarding 2/2 `/signup/checkout` (delivery address + card, $0) → `/studio/organisation/photographer-program` |
+| 2 | New user, through Checkout page | `/` → `/pricing` → `/checkout?plan=camera` (Photographer: contact + company details, $0 request) → request received → `/email/approved` → sign in → code → onboarding 1/2 `/signup/workspace` → onboarding 2/2 `/signup/checkout` (delivery address + card) → Photographer program tab |
+| 3 | Demo account, through Dashboard | `/studio/projects` (demo box → Manage plan) → `/studio/plan` → `/studio/checkout?plan=camera` (prefilled from the account, $0 request) → request received → `/email/approved` → sign in → code → `/signup/checkout` (delivery address + card, only step) → Photographer program tab |
 
-The site header "Log in" opens the same Content Studio log-in; once the camera is ordered it goes
-straight to the Photographer program tab.
-
-### Existing accounts (in-app upgrade)
-The prototype map (yellow dot, top-left) switches the account type: new user (website path), demo
-account (Free, no Billing tab; upgrades only via the sidebar's Manage plan) or Content Studio Plus
-(paid; Organisation settings → Billing → Manage plan). `/studio/plan` shows the same Agent /
-Photographer split as the website; Apply opens the application form prefilled from the account.
-After the approval email, the log-in goes to the camera order; existing accounts skip the workspace step.
-Once the camera is ordered, Photographer program replaces Billing in Organisation settings.
+In every flow the request is reviewed by Customer Support first. The delivery address and card are
+asked only after approval, inside Content Studio (the email link leads to sign-in), with the Stripe
+note and "nothing is charged today". Once the program is active, Photographer program replaces
+Billing in Organisation settings.
 
 ## Highlights
 - Sticky header with frosted background that fades in on scroll; CTA buttons reveal after the first fold

@@ -69,6 +69,9 @@
 }
 .protoNav__item {
   display: block;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
   padding: 6px 8px;
   border-radius: 4px;
   font-size: 12px;
@@ -93,26 +96,33 @@
   transition: color 0.12s ease, border-color 0.12s ease;
 }
 .protoNav__reset:hover { color: #1a222e; border-color: #1a222e; }
-.protoNav__accounts { display: flex; flex-direction: column; gap: 2px; }
-.protoNav__account {
+
+.protoNav__step {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
-  padding: 5px 8px;
-  border-radius: 4px;
-  font-family: inherit;
+}
+.protoNav__stepNum {
+  flex: none;
+  width: 16px;
+  color: rgba(26, 34, 46, 0.5);
+  text-align: right;
+}
+.protoNav__step.is-active .protoNav__stepNum { color: #1a222e; }
+.protoNav__empty {
+  margin: 0;
+  padding: 4px 8px;
   font-size: 11px;
-  line-height: 16px;
-  text-align: left;
-  color: rgba(26, 34, 46, 0.75);
+  color: rgba(26, 34, 46, 0.6);
 }
-.protoNav__account::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  border: 1px solid rgba(26, 34, 46, 0.4);
+.protoNav__foot {
+  display: flex;
+  gap: 8px;
 }
-.protoNav__account:hover { background: rgba(26, 34, 46, 0.06); }
-.protoNav__account.is-active { color: #1a222e; font-weight: 600; }
-.protoNav__account.is-active::before { background: #ffc600; border-color: #1a222e; }
+.protoNav__foot .protoNav__reset {
+  flex: 1 1 0;
+  margin-top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

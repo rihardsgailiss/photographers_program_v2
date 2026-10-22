@@ -45,7 +45,7 @@ function Field({ id, label, error, children, className = '' }) {
  * for the confirmation message.
  */
 export default function ApplicationForm({ variant = 'card', title = 'Apply to the program', onSubmitted }) {
-  const { submitApplication, account, profile } = useProgram()
+  const { submitApplication, account, profile, status } = useProgram()
   const fromAccount = account !== 'new'
   const [values, setValues] = useState(() =>
     fromAccount
@@ -53,7 +53,6 @@ export default function ApplicationForm({ variant = 'card', title = 'Apply to th
       : EMPTY,
   )
   const [errors, setErrors] = useState({})
-  const [done, setDone] = useState(false)
 
   const set = (key) => (e) => {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value
@@ -68,7 +67,6 @@ export default function ApplicationForm({ variant = 'card', title = 'Apply to th
     if (Object.keys(errs).length) return
     const { consent, ...data } = values
     submitApplication(data)
-    setDone(true)
     onSubmitted?.(data)
   }
 
@@ -78,14 +76,13 @@ export default function ApplicationForm({ variant = 'card', title = 'Apply to th
     setErrors({})
   }
 
-  if (done) {
+  if (status !== 'none') {
     return (
       <ApplicationConfirmation
         variant={variant}
         onReset={() => {
           setValues(EMPTY)
           setErrors({})
-          setDone(false)
         }}
       />
     )

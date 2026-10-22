@@ -73,3 +73,7 @@ export function slugify(s) {
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/(^-|-$)/g, '')
 }
+
+/* Demo values for the prototype autofill on checkout screens (published test card, sample address). */
+export const DEMO_CARD = { number: '4242 4242 4242 4242', expiry: '12/29', cvc: '123' }
+export const DEMO_ADDRESS = { street: '128 Market Street', apt: '', city: 'San Francisco', state: 'CA', zip: '94105', country: 'United States' }

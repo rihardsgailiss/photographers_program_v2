@@ -1,51 +1,25 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useProgram } from '../context/ProgramContext.jsx'
-import { ACCOUNTS } from '../data/plans.js'
+import { FLOWS, stepActive, stepPath } from '../data/flows.js'
 import './ProtoNav.css'
 
-/* Prototype-only navigator: a tiny dot in the top-left corner that expands into a map of
-   every screen in the Photographer program flow. Not part of the product UI. */
-const GROUPS = [
-  {
-    title: 'Website',
-    items: [
-      { label: 'Home', to: '/' },
-      { label: 'Pricing (Agent / Photographer)', to: '/pricing' },
-      { label: 'Photographer program landing', to: '/photographer-program' },
-    ],
-  },
-  {
-    title: 'Email',
-    items: [{ label: 'Approval email', to: '/email/approved' }],
-  },
-  {
-    title: 'Content Studio',
-    items: [
-      { label: 'Log in', to: '/signup/login', match: (p) => p === '/signup/login' },
-      { label: 'Email code', to: '/signup/code' },
-      { label: 'Order the camera', to: '/signup/order' },
-      { label: 'Name your workspace (new accounts)', to: '/signup/workspace' },
-      { label: 'Dashboard · Projects', to: '/studio/projects' },
-      { label: 'Manage your plan (in-app upgrade)', to: '/studio/plan' },
-      { label: 'Organisation · Billing (paid plans)', to: '/studio/organisation/billing' },
-      { label: 'Organisation · Photographer program', to: '/studio/organisation/photographer-program' },
-    ],
-  },
-]
-
+/* Prototype-only navigator: a tiny dot in the top-left corner that expands into the step map
+   of the active flow. Any step can be jumped to; the step prepares the state it needs. */
 const STATUS_LABEL = {
   none: 'not applied',
-  submitted: 'application sent',
+  submitted: 'request sent',
   loggedIn: 'signed in',
-  ordered: 'camera ordered',
+  ordered: 'in the program',
 }
 
 export default function ProtoNav() {
   const [open, setOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { status, profile, account, setAccount, reset } = useProgram()
+  const ctx = useProgram()
+  const { status, profile, flow: flowId, reset } = ctx
+  const flow = FLOWS[flowId] ?? null
   const rootRef = useRef(null)
 
   useEffect(() => {
@@ -66,10 +40,16 @@ export default function ProtoNav() {
     }
   }, [open])
 
-  const onReset = () => {
+  const goTo = (step) => {
+    step.prepare?.(ctx)
+    setOpen(false)
+    navigate(stepPath(step, ctx))
+  }
+
+  const onRestart = () => {
     reset()
     setOpen(false)
-    navigate('/photographer-program')
+    navigate(flow ? flow.start : '/flows')
   }
 
   return (
@@ -85,56 +65,45 @@ export default function ProtoNav() {
       {open && (
         <nav className="protoNav__panel" aria-label="Prototype map">
           <div className="protoNav__head">
-            <span className="protoNav__title">Prototype map</span>
+            <span className="protoNav__title">{flow ? flow.name : 'Prototype map'}</span>
             <span className="protoNav__status">
-              {profile.firstName} · {STATUS_LABEL[status] ?? status}
+              {flow ? `${profile.firstName} · ${STATUS_LABEL[status] ?? status}` : 'No flow selected'}
             </span>
           </div>
 
-          <div className="protoNav__group">
-            <span className="protoNav__groupTitle">Account · switching restarts the flow</span>
-            <div className="protoNav__accounts" role="radiogroup" aria-label="Prototype account type">
-              {Object.entries(ACCOUNTS).map(([id, a]) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="radio"
-                  aria-checked={account === id}
-                  className={`protoNav__account${account === id ? ' is-active' : ''}`}
-                  onClick={() => {
-                    setAccount(id)
-                    setOpen(false)
-                    navigate(id === 'new' ? '/photographer-program' : '/studio/projects')
-                  }}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {GROUPS.map((g) => (
-            <div className="protoNav__group" key={g.title}>
-              <span className="protoNav__groupTitle">{g.title}</span>
-              {g.items.map((item) => {
-                const active = item.match ? item.match(pathname) : pathname === item.to
+          {flow ? (
+            <div className="protoNav__group">
+              <span className="protoNav__groupTitle">Steps · click to jump</span>
+              {flow.steps.map((step, i) => {
+                const active = stepActive(step, pathname, ctx)
                 return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={`protoNav__item${active ? ' is-active' : ''}`}
-                    aria-current={active ? 'page' : undefined}
+                  <button
+                    type="button"
+                    key={step.label}
+                    className={`protoNav__item protoNav__step${active ? ' is-active' : ''}`}
+                    aria-current={active ? 'step' : undefined}
+                    onClick={() => goTo(step)}
                   >
-                    {item.label}
-                  </Link>
+                    <span className="protoNav__stepNum">{i + 1}</span>
+                    <span>{step.label}</span>
+                  </button>
                 )
               })}
             </div>
-          ))}
+          ) : (
+            <p className="protoNav__empty">Pick a flow to see its steps here.</p>
+          )}
 
-          <button type="button" className="protoNav__reset" onClick={onReset}>
-            Reset demo and start over
-          </button>
+          <div className="protoNav__foot">
+            <Link to="/flows" className="protoNav__reset">
+              {flow ? 'Switch flow' : 'Choose a flow'}
+            </Link>
+            {flow && (
+              <button type="button" className="protoNav__reset" onClick={onRestart}>
+                Restart flow
+              </button>
+            )}
+          </div>
         </nav>
       )}
     </div>

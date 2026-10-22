@@ -5,14 +5,13 @@ import StepFrame from '../../components/studio/StepFrame.jsx'
 import StudioField, { FloatInput } from '../../components/studio/StudioField.jsx'
 import { useProgram } from '../../context/ProgramContext.jsx'
 
-/* The only onboarding step for a new customer after the camera order: name the workspace.
-   Everything else is already known from the application and editable later in settings. */
+/* Onboarding step 1 of 2 for new accounts: name the workspace. Everything else is already
+   known from the application; the delivery address and card come next. */
 export default function Workspace() {
   const navigate = useNavigate()
   const { profile, signup, updateSignup } = useProgram()
   const [org, setOrg] = useState(signup.orgName || `${profile.lastName} Photography`.trim())
   const [error, setError] = useState('')
-
 
   const onSubmit = (e) => {
     e.preventDefault()
@@ -21,18 +20,18 @@ export default function Workspace() {
       return
     }
     updateSignup({ orgName: org.trim(), country: profile.country, phone: profile.phone })
-    navigate('/studio/organisation/photographer-program')
+    navigate('/signup/checkout')
   }
 
   return (
     <>
       <StudioBar />
       <StepFrame
-        eyebrow="One last thing"
+        eyebrow="Step 1 of 2"
         title="Name your workspace"
-        intro="Your camera is ordered. Give your Content Studio workspace a name and you're in."
+        intro="Welcome to the program. Give your Content Studio workspace a name; your delivery address and card come next."
         onSubmit={onSubmit}
-        nextLabel="Enter Content Studio"
+        nextLabel="Next"
       >
         <StudioField
           id="org"

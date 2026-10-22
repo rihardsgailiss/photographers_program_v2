@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useProgram } from '../../context/ProgramContext.jsx'
+import { useFlow, useProgram } from '../../context/ProgramContext.jsx'
 import { diffDays, fmtDate } from '../../context/programDefaults.js'
 import { PROGRAM_STEPS } from '../../data/programSteps.js'
 import { DAY_ONE, STATUS_LABEL, STATUS_TONE, summarise } from '../../data/dashboardDemo.js'
@@ -78,6 +78,7 @@ function PartnerLink({ url, live }) {
 
 export default function Dashboard({ embedded = false }) {
   const { profile, status, reset } = useProgram()
+  const flow = useFlow()
   const data = DAY_ONE
   const [filter, setFilter] = useState('all')
 
@@ -272,7 +273,7 @@ export default function Dashboard({ embedded = false }) {
 
       <p className="dashProto">
         Prototype · signed in as {profile.fullName} ({profile.email}) · status: {status}.{' '}
-        <Link to="/photographer-program" onClick={reset}>Reset demo and start over</Link>
+        <Link to={flow.start} onClick={reset}>Restart this flow</Link>
       </p>
     </div>
   )

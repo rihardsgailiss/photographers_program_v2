@@ -1,17 +1,40 @@
 import { Link } from 'react-router-dom'
-import { useProgram } from '../context/ProgramContext.jsx'
+import { useFlow, useProgram } from '../context/ProgramContext.jsx'
 import { fmtDate } from '../context/programDefaults.js'
 import { ArrowBack } from '../components/icons/index.jsx'
 import './ApprovalEmail.css'
 
-/* Prototype-only: the approval email customer support sends after the call. */
+const NEXT = {
+  landing: {
+    intro: 'Sign in with this email to finish setting up:',
+    steps: ['Name your Content Studio workspace', 'Add your delivery address and a card. Nothing is charged.'],
+    outro: 'When you submit, your camera ships and your partner link goes live. Your 6 months start that day.',
+    cta: 'Complete sign-up',
+  },
+  checkout: {
+    intro: 'Sign in with this email to finish setting up:',
+    steps: ['Name your Content Studio workspace', 'Add your delivery address and a card. Nothing is charged.'],
+    outro: 'When you submit, your camera ships and your partner link goes live. Your 6 months start that day.',
+    cta: 'Complete sign-up',
+  },
+  demo: {
+    intro: 'Sign in to your account and:',
+    steps: ['Add your delivery address and a card. Nothing is charged.'],
+    outro: 'When you submit, your camera ships and your partner link goes live. Your 6 months start that day.',
+    cta: 'Sign in',
+  },
+}
+
+/* Prototype-only: the acceptance email customer support sends after the call. */
 export default function ApprovalEmail() {
   const { profile } = useProgram()
+  const flow = useFlow()
+  const next = NEXT[flow.id] ?? NEXT.landing
   const loginHref = `/signup/login?email=${encodeURIComponent(profile.email)}`
 
   return (
     <div className="email">
-      <Link to="/photographer-program" className="email__back">
+      <Link to={flow.start} className="email__back">
         <ArrowBack size={20} />
         Back to site
       </Link>
@@ -37,16 +60,14 @@ export default function ApprovalEmail() {
         <div className="email__body">
           <img className="email__logo" src="/assets/logo-giraffe360.svg" alt="Giraffe360" width={91} height={12} />
           <h1 className="email__title">Welcome to the program, {profile.firstName}!</h1>
-          <p>Log in or sign up with this email. Then add:</p>
+          <p>{next.intro}</p>
           <ol className="email__list">
-            <li>Your card. Nothing is charged.</li>
-            <li>Your delivery and billing address</li>
+            {next.steps.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
           </ol>
-          <p>
-            When you submit, your camera ships and your partner link goes live. Your 6 months
-            start that day.
-          </p>
-          <Link to={loginHref} className="btn btn--primary email__cta">Complete sign-up</Link>
+          <p>{next.outro}</p>
+          <Link to={loginHref} className="btn btn--primary email__cta">{next.cta}</Link>
           <p className="email__fine">This link works once and is valid until {fmtDate(profile.linkExpiry)}.</p>
         </div>
       </article>

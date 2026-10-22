@@ -17,32 +17,6 @@
   line-height: 40px;
   letter-spacing: -0.2px;
 }
-.managePlan__audience {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 32px;
-}
-.managePlan__audienceLabel { font-size: 15px; color: var(--st-muted); }
-.planToggle {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  border-radius: 999px;
-  background: var(--st-soft);
-}
-.planToggle__opt {
-  padding: 8px 18px;
-  border-radius: 999px;
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--st-text);
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-.planToggle__opt.is-active { background: var(--st-text); color: #fff; }
-
 .managePlan__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
